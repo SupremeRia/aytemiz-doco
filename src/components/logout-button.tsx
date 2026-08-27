@@ -20,6 +20,8 @@ export function LogoutButton() {
       return;
     }
 
+    navigator.serviceWorker?.controller?.postMessage({ type: "CLEAR_PRIVATE_CACHES" });
+    if ("caches" in window) await Promise.all((await caches.keys()).map((key) => caches.delete(key)));
     router.replace("/login");
     router.refresh();
   }

@@ -56,14 +56,15 @@ Uzak projede `supabase/seed.sql` içeriğini SQL Editor'da çalıştırın. Seed
 1. Uygulamadan normal kayıt olun; hesap `pending` kalır.
 2. Supabase SQL Editor'da e-posta adresini değiştirerek çalıştırın:
 
-```sql
-insert into public.system_admins(user_id, created_by)
-select id, id from public.profiles where email = 'ilk.op@ornek.com';
+SQL Editor'da veritabanı sahibi olarak yalnızca OP bulunmayan yeni kurulumda çalıştırın:
 
-update public.profiles
-set status = 'active'
-where email = 'ilk.op@ornek.com';
+```sql
+select private.bootstrap_first_operator(
+  (select id from public.profiles where lower(email) = lower('ilk.op@ornek.com'))
+);
 ```
+
+Fonksiyon istemci rollerine kapalıdır, yalnızca ilk OP için çalışır ve açık bir `bootstrap` audit kaydı üretir. E-posta adresine bağlı otomatik ayrıcalık ataması yoktur.
 
 İlk kayıt otomatik OP olmaz. İlk bootstrap'tan sonra OP ekleme/kaldırma yalnızca mevcut OP üzerinden yapılabilir. Database trigger'ı son aktif OP'nin kaldırılmasını engeller ve tüm değişiklikleri audit log'a yazar.
 
@@ -83,7 +84,9 @@ Repository'yi Vercel'e bağlayın, iki environment variable'ı Preview ve Produc
 
 ## PWA Kurulumu
 
-Manifest, standalone modu, tema rengi, placeholder SVG ikon ve service worker hazırdır. Production'da HTTPS altında kurulum yapılabilir.
+Manifest, standalone modu, tema rengi, placeholder SVG ikon ve service worker hazırdır. Service worker yalnızca aynı origin'deki statik asset'leri cache'ler; oturumlu sayfalar, gezinme cevapları ve API verileri cache'e alınmaz. Production'da HTTPS altında kurulum yapılabilir.
+
+`public/icon.svg` geçici uygulama simgesidir; resmi Aytemiz logosu değildir. Lisanslı kurumsal asset sağlanmadan resmi logo gibi kullanılmamalıdır.
 
 ## Android Ana Ekrana Ekleme
 
