@@ -10,6 +10,14 @@ export type AdminRow = {
   badge: string;
   badgeTone?: "success" | "warning" | "danger" | "neutral";
   state?: string;
+  details?: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    employeeNumber: string;
+    roleIds: string[];
+    stationIds: string[];
+  };
 };
 
 export type AdminFormOptions = {
@@ -39,9 +47,15 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
   const supabase = await createClient();
 
   if (section === "pending-users" || section === "users") {
-    let query = supabase.from("profiles").select("id,first_name,last_name,email,status,employee_number,created_at").order("created_at", { ascending: false });
+    let query = supabase.from("profiles").select("id,first_name,last_name,email,status,phone,employee_number,created_at").order("created_at", { ascending: false });
     query = section === "pending-users" ? query.eq("status", "pending") : query.neq("status", "deleted");
-    const { data, error } = await query;
+    const [{ data, error }, { data: roleAssignments }, { data: stationAssignments }] = await Promise.all([
+      query,
+      supabase.from("user_roles").select("user_id,role_id"),
+      supabase.from("user_station_assignments").select("user_id,station_id"),
+    ]);
+    const rolesByUser = groupAssignments(roleAssignments ?? [], "role_id");
+    const stationsByUser = groupAssignments(stationAssignments ?? [], "station_id");
     return {
       error: error?.message ?? null,
       rows: (data ?? []).map((profile) => ({
@@ -52,6 +66,14 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
         badge: statusLabel(profile.status),
         badgeTone: statusTone(profile.status),
         state: profile.status,
+        details: {
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          phone: profile.phone ?? "",
+          employeeNumber: profile.employee_number ?? "",
+          roleIds: rolesByUser.get(profile.id) ?? [],
+          stationIds: stationsByUser.get(profile.id) ?? [],
+        },
       })),
     };
   }
@@ -138,6 +160,12 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
       badgeTone: log.action === "delete" ? "danger" : log.action === "insert" ? "success" : "warning",
     })),
   };
+}
+
+function groupAssignments<T extends "role_id"|"station_id">(rows: ({ user_id: string } & Record<T,string>)[], key: T) {
+  const grouped = new Map<string,string[]>();
+  for (const row of rows) grouped.set(row.user_id, [...(grouped.get(row.user_id) ?? []), row[key]]);
+  return grouped;
 }
 
 export async function getAdminFormOptions(): Promise<AdminFormOptions> {

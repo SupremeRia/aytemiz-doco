@@ -55,6 +55,27 @@ export async function updateUserStatus(form: FormData) {
   done("users");
 }
 
+export async function updateUserAccess(form: FormData) {
+  const userId = value(form, "userId", 36);
+  const status = value(form, "status", 20);
+  const roleIds = form.getAll("roleIds").map(String).filter(id => UUID.test(id));
+  const stationIds = form.getAll("stationIds").map(String).filter(id => UUID.test(id));
+  if (!UUID.test(userId) || !["active", "suspended", "banned"].includes(status)) fail("users", "Geçersiz kullanıcı bilgisi.");
+  const { supabase } = await authorizedClient();
+  const { error } = await supabase.rpc("update_user_access", {
+    target_user: userId,
+    new_first_name: value(form, "firstName", 80),
+    new_last_name: value(form, "lastName", 80),
+    new_phone: value(form, "phone", 30),
+    new_employee_number: value(form, "employeeNumber", 50),
+    new_status: status,
+    role_ids: roleIds,
+    station_ids: stationIds,
+  });
+  if (error) fail("users", error.message);
+  done("users");
+}
+
 export async function createStation(form: FormData) {
   const name = value(form, "name"); const city = value(form, "city", 80); const slug = value(form, "slug", 100).toLowerCase();
   if (!name || !city || !SLUG.test(slug)) fail("stations", "Ad, şehir ve tireli küçük harf slug alanlarını kontrol edin.");
