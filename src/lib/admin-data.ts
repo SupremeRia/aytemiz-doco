@@ -18,6 +18,17 @@ export type AdminRow = {
     roleIds: string[];
     stationIds: string[];
   };
+  stationDetails?: {
+    name: string;
+    city: string;
+    slug: string;
+    stationCode: string;
+    address: string;
+    phone: string;
+    openingDate: string;
+    imageUrl: string;
+    staff: { id: string; name: string; email: string }[];
+  };
 };
 
 export type AdminFormOptions = {
@@ -33,7 +44,7 @@ export async function getAdminCounts() {
   const queries = [
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).neq("status", "deleted"),
-    supabase.from("stations").select("id", { count: "exact", head: true }).eq("is_active", true),
+    supabase.from("stations").select("id", { count: "exact", head: true }).eq("is_active", true).is("deleted_at", null),
     supabase.from("roles").select("id", { count: "exact", head: true }).eq("is_active", true),
     supabase.from("permissions").select("id", { count: "exact", head: true }).eq("is_active", true),
     supabase.from("system_admins").select("id", { count: "exact", head: true }).eq("is_op", true),
@@ -79,7 +90,18 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
   }
 
   if (section === "stations") {
-    const { data, error } = await supabase.from("stations").select("id,name,city,station_code,address,is_active").order("city").order("name");
+    const [{ data, error }, { data: assignments }, { data: profiles }] = await Promise.all([
+      supabase.from("stations").select("id,name,city,slug,station_code,address,phone,opening_date,image_url,is_active").is("deleted_at", null).order("city").order("name"),
+      supabase.from("user_station_assignments").select("user_id,station_id"),
+      supabase.from("profiles").select("id,first_name,last_name,email").neq("status", "deleted"),
+    ]);
+    const profileMap = new Map((profiles ?? []).map(profile=>[profile.id,profile]));
+    const staffByStation = new Map<string,{id:string;name:string;email:string}[]>();
+    for(const assignment of assignments ?? []){
+      const profile=profileMap.get(assignment.user_id);if(!profile)continue;
+      const staff={id:profile.id,name:`${profile.first_name} ${profile.last_name}`.trim()||"İsimsiz personel",email:profile.email};
+      staffByStation.set(assignment.station_id,[...(staffByStation.get(assignment.station_id)??[]),staff]);
+    }
     return {
       error: error?.message ?? null,
       rows: (data ?? []).map((station) => ({
@@ -90,6 +112,17 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
         badge: station.is_active ? "Aktif" : "Pasif",
         badgeTone: station.is_active ? "success" : "neutral",
         state: String(station.is_active),
+        stationDetails: {
+          name: station.name,
+          city: station.city,
+          slug: station.slug,
+          stationCode: station.station_code ?? "",
+          address: station.address ?? "",
+          phone: station.phone ?? "",
+          openingDate: station.opening_date ?? "",
+          imageUrl: station.image_url ?? "",
+          staff: staffByStation.get(station.id) ?? [],
+        },
       })),
     };
   }
@@ -172,7 +205,7 @@ export async function getAdminFormOptions(): Promise<AdminFormOptions> {
   const supabase = await createClient();
   const [{ data: roles }, { data: stations }] = await Promise.all([
     supabase.from("roles").select("id,name").eq("is_active", true).order("name"),
-    supabase.from("stations").select("id,name,city").eq("is_active", true).order("city").order("name"),
+    supabase.from("stations").select("id,name,city").eq("is_active", true).is("deleted_at", null).order("city").order("name"),
   ]);
   return { roles: roles ?? [], stations: stations ?? [] };
 }

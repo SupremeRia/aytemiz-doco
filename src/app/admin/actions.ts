@@ -89,6 +89,35 @@ export async function toggleStation(form: FormData) {
   await toggleRecord(form, "stations", "stations", "edit_station");
 }
 
+export async function updateStation(form: FormData) {
+  const id=value(form,"id",36);const name=value(form,"name");const city=value(form,"city",80);const slug=value(form,"slug",100).toLowerCase();
+  if(!UUID.test(id)||!name||!city||!SLUG.test(slug))fail("stations","İstasyon alanlarını kontrol edin.");
+  const{ supabase }=await authorizedClient();
+  let imageUrl:string|undefined;
+  const image=form.get("image");
+  if(image instanceof File&&image.size>0){
+    if(image.size>5*1024*1024||!["image/jpeg","image/png","image/webp"].includes(image.type))fail("stations","Görsel JPG, PNG veya WEBP ve en fazla 5 MB olmalıdır.");
+    const extension=image.type==="image/png"?"png":image.type==="image/webp"?"webp":"jpg";
+    const path=`${id}/${crypto.randomUUID()}.${extension}`;
+    const{error:uploadError}=await supabase.storage.from("station-images").upload(path,await image.arrayBuffer(),{contentType:image.type,cacheControl:"3600",upsert:false});
+    if(uploadError)fail("stations",uploadError.message);
+    imageUrl=supabase.storage.from("station-images").getPublicUrl(path).data.publicUrl;
+  }
+  const changes:{[key:string]:string|null|undefined}={name,city,slug,station_code:value(form,"stationCode",40)||null,address:value(form,"address",300)||null,phone:value(form,"phone",30)||null,opening_date:value(form,"openingDate",10)||null,updated_at:new Date().toISOString()};
+  if(imageUrl)changes.image_url=imageUrl;
+  const{error}=await supabase.from("stations").update(changes).eq("id",id).is("deleted_at",null);
+  if(error)fail("stations",error.message);
+  done("stations");
+}
+
+export async function deleteStation(form: FormData) {
+  const id=value(form,"id",36);if(!UUID.test(id))fail("stations","Geçersiz istasyon.");
+  const{supabase,user}=await authorizedClient();
+  const{error}=await supabase.from("stations").update({is_active:false,deleted_at:new Date().toISOString(),deleted_by:user.id,updated_at:new Date().toISOString()}).eq("id",id).is("deleted_at",null);
+  if(error)fail("stations",error.message);
+  done("stations");
+}
+
 export async function createRole(form: FormData) {
   const name = value(form, "name"); const slug = value(form, "slug", 100).toLowerCase();
   if (!name || !SLUG.test(slug)) fail("roles", "Rol adı ve slug alanlarını kontrol edin.");
