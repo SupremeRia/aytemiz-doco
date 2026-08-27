@@ -1,0 +1,4 @@
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+import { getSupabaseEnv, hasSupabaseEnv } from "./config";
+export async function updateSession(request:NextRequest){let response=NextResponse.next({request});if(!hasSupabaseEnv())return response;const{url,key}=getSupabaseEnv();const supabase=createServerClient(url,key,{cookies:{getAll:()=>request.cookies.getAll(),setAll(items){items.forEach(({name,value})=>request.cookies.set(name,value));response=NextResponse.next({request});items.forEach(({name,value,options})=>response.cookies.set(name,value,options))}}});const{data}=await supabase.auth.getClaims();const user=data?.claims;const path=request.nextUrl.pathname;const isAuth=path==="/login"||path==="/register";if(!user&&!isAuth)return NextResponse.redirect(new URL("/login",request.url));if(user&&isAuth)return NextResponse.redirect(new URL("/dashboard",request.url));return response}
