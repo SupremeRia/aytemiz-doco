@@ -9,6 +9,12 @@ export type AdminRow = {
   meta: string;
   badge: string;
   badgeTone?: "success" | "warning" | "danger" | "neutral";
+  state?: string;
+};
+
+export type AdminFormOptions = {
+  roles: { id: string; name: string }[];
+  stations: { id: string; name: string; city: string }[];
 };
 
 const shortId = (value: string | null) => value ? `${value.slice(0, 8)}…` : "Sistem";
@@ -45,6 +51,7 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
         meta: profile.employee_number ? `Sicil: ${profile.employee_number}` : `Kayıt: ${date(profile.created_at)}`,
         badge: statusLabel(profile.status),
         badgeTone: statusTone(profile.status),
+        state: profile.status,
       })),
     };
   }
@@ -60,6 +67,7 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
         meta: station.station_code ? `İstasyon kodu: ${station.station_code}` : "İstasyon kodu girilmemiş",
         badge: station.is_active ? "Aktif" : "Pasif",
         badgeTone: station.is_active ? "success" : "neutral",
+        state: String(station.is_active),
       })),
     };
   }
@@ -75,6 +83,7 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
         meta: role.slug,
         badge: role.is_system_role ? "Sistem rolü" : role.is_active ? "Özel rol" : "Pasif",
         badgeTone: role.is_active ? "neutral" : "danger",
+        state: String(role.is_active),
       })),
     };
   }
@@ -90,6 +99,7 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
         meta: permission.category,
         badge: scopeLabel(permission.scope_type),
         badgeTone: permission.is_active ? "neutral" : "danger",
+        state: String(permission.is_active),
       })),
     };
   }
@@ -128,6 +138,15 @@ export async function getAdminSectionRows(section: AdminSection): Promise<{ rows
       badgeTone: log.action === "delete" ? "danger" : log.action === "insert" ? "success" : "warning",
     })),
   };
+}
+
+export async function getAdminFormOptions(): Promise<AdminFormOptions> {
+  const supabase = await createClient();
+  const [{ data: roles }, { data: stations }] = await Promise.all([
+    supabase.from("roles").select("id,name").eq("is_active", true).order("name"),
+    supabase.from("stations").select("id,name,city").eq("is_active", true).order("city").order("name"),
+  ]);
+  return { roles: roles ?? [], stations: stations ?? [] };
 }
 
 function statusLabel(status: string) {
