@@ -1,7 +1,8 @@
-import { File, Megaphone, UserRound } from "lucide-react";
+import { File, Megaphone, Newspaper, UserRound } from "lucide-react";
 import { Avatar, Badge, Card, StatusBadge } from "@/components/ui/primitives";
 export function UserCard({name,role,station,phone}:{name:string;role?:string;station?:string;phone?:string}){return <Card className="entity-card"><Avatar name={name}/><div><h3>{name}</h3><p className="muted">{role??"Görev bilgisi yok"}{station?` · ${station}`:""}</p>{phone?<a href={`tel:${phone}`}>{phone}</a>:null}</div></Card>}
 export function TaskCard({title,status="Bekliyor",priority="Normal"}:{title:string;status?:string;priority?:string}){return <Card><div className="card-row"><Badge tone={priority==="Acil"?"danger":"neutral"}>{priority}</Badge><StatusBadge label={status} tone="warning"/></div><h3>{title}</h3></Card>}
 export function AnnouncementCard({title,body,level="Normal"}:{title:string;body:string;level?:"Normal"|"Önemli"|"Acil"}){return <Card><Badge tone={level==="Acil"?"danger":level==="Önemli"?"warning":"info"}><Megaphone size={14}/>{level}</Badge><h3>{title}</h3><p className="muted">{body}</p></Card>}
 export function FileCard({name,type,size}:{name:string;type:string;size?:string}){return <Card className="entity-card"><File/><div><h3>{name}</h3><p className="muted">{type}{size?` · ${size}`:""}</p></div></Card>}
 export function PhotoPostCard({title,author,count}:{title:string;author:string;count:number}){return <Card><div className="photo-placeholder">{count} fotoğraf</div><h3>{title}</h3><p className="muted"><UserRound size={14}/>{author}</p></Card>}
+export function NewsCard({title,description,date}:{title:string;description:string;date:string}){return <Card><span className="grid h-11 w-11 place-items-center rounded-xl bg-blue-950 text-blue-300"><Newspaper/></span><h3>{title}</h3><p className="muted">{description}</p><time>{date}</time></Card>}
