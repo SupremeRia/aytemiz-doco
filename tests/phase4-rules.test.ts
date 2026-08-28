@@ -1,0 +1,14 @@
+import test from "node:test";import assert from "node:assert/strict";import {announcementScopeMatches,canEditOperation,canSeeOperation,deduplicateNotifications,identityLabel,markAllRead,markRead,removeException} from "../src/lib/phase4-rules.ts";import {resolvePermission} from "../src/lib/auth/authorization.ts";
+test("operation post station isolation",()=>assert.equal(canSeeOperation(["a"],"b",true,false),false));
+test("operation 60 minute edit",()=>assert.equal(canEditOperation(0,3600001,true,true,false),false));
+test("operation override permission",()=>assert.equal(canEditOperation(0,9999999,false,false,true),true));
+test("operation draft visibility",()=>assert.equal(canSeeOperation(["a"],"a",false,false),false));
+test("announcement scope",()=>assert.equal(announcementScopeMatches({kind:"region",regionId:"r1"},[],["r1"]),true));
+test("announcement read receipt",()=>assert.equal(markRead(new Set(),"a").has("a"),true));
+test("notification read",()=>assert.equal(markRead(new Set(["a"]),"b").size,2));
+test("notification mark all read",()=>assert.equal(markAllRead(["a","b"]).size,2));
+test("duplicate notification prevention",()=>assert.deepEqual(deduplicateNotifications(["a","a","b"]),["a","b"]));
+test("same-name user picker identification",()=>assert.notEqual(identityLabel({name:"Emin Deniz",roles:["Müdür"],stations:["Yakutiye"],email:"a@x.com"}),identityLabel({name:"Emin Deniz",roles:["Satış"],stations:["Aziziye"],email:"b@x.com"})));
+test("user permission allow/deny priority",()=>assert.equal(resolvePermission({isOp:false,explicitDeny:true,userAllow:true,roleAllow:true}),false));
+test("user permission removal",()=>assert.equal(removeException([{id:"a"}],"a",true).length,0));
+test("admin user permission authorization",()=>assert.throws(()=>removeException([{id:"a"}],"a",false),/forbidden/));

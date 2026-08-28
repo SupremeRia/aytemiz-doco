@@ -1,0 +1,4 @@
+"use server";
+import {revalidatePath} from "next/cache";import {redirect} from "next/navigation";import {createClient} from "@/lib/supabase/server";
+export async function markNotificationRead(form:FormData){const id=String(form.get("notificationId")??""),url=String(form.get("url")??"");const supabase=await createClient();const{error}=await supabase.rpc("mark_notification_read",{target_notification:id});if(error)redirect(`/notifications?error=${encodeURIComponent(error.message)}`);revalidatePath("/notifications");redirect(url.startsWith("/")?url:"/notifications")}
+export async function markAllNotificationsRead(){const supabase=await createClient();const{error}=await supabase.rpc("mark_all_notifications_read");if(error)redirect(`/notifications?error=${encodeURIComponent(error.message)}`);revalidatePath("/notifications");redirect("/notifications?saved=all-read")}
