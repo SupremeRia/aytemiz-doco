@@ -1,0 +1,2 @@
+import { Checkbox } from "@/components/ui/primitives";
+export function PersonnelPicker({people}:{people:{user_id:string;first_name:string;last_name:string;role_name:string|null}[]}){return <fieldset className="permission-grid"><legend>Personel seç</legend>{people.map(person=><label className="permission-option" key={person.user_id}><Checkbox name="assigneeIds" value={person.user_id}/><span><strong>{`${person.first_name} ${person.last_name}`.trim()}</strong><small>{person.role_name??"Rol atanmamış"}</small></span></label>)}</fieldset>}

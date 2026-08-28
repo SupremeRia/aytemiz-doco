@@ -1,0 +1,14 @@
+import test from "node:test";import assert from "node:assert/strict";import { canEditEvidence,canTransition,completionStatus,effectiveStatus,evidenceSatisfied,isAfterCursor } from "../src/lib/tasks/workflow.ts";
+test("assigned görev başlatılabilir",()=>assert.equal(canTransition("assigned","in_progress"),true));
+test("tamamlanan görev yeniden başlatılamaz",()=>assert.equal(canTransition("completed","in_progress"),false));
+test("inceleme gerektiren tamamlama beklemeye alınır",()=>assert.equal(completionStatus(true),"awaiting_review"));
+test("incelemesiz görev tamamlanır",()=>assert.equal(completionStatus(false),"completed"));
+test("fotoğraf kanıt zorunluluğu uygulanır",()=>assert.equal(evidenceSatisfied("photo","",0),false));
+test("fotoğraf ve açıklama birlikte doğrulanır",()=>assert.equal(evidenceSatisfied("photo_and_description","Yapıldı",1),true));
+test("kanıt sahibi 60 dakika içinde düzenler",()=>assert.equal(canEditEvidence(0,60*60*1000,true,false),true));
+test("kanıt sahibi 60 dakika sonra düzenleyemez",()=>assert.equal(canEditEvidence(0,60*60*1000+1,true,false),false));
+test("override yetkisi süreyi aşar",()=>assert.equal(canEditEvidence(0,99999999,false,true),true));
+test("geciken aktif görev efektif overdue olur",()=>assert.equal(effectiveStatus("in_progress",100,101),"overdue"));
+test("tamamlanan görev overdue olmaz",()=>assert.equal(effectiveStatus("completed",100,101),"completed"));
+test("cursor aynı zamanda id ile deterministiktir",()=>assert.equal(isAfterCursor({createdAt:"2026-01-01",id:"a"},{createdAt:"2026-01-01",id:"b"}),true));
+test("ret sonrası yeniden çalışma akışı mümkündür",()=>assert.equal(canTransition("rejected","in_progress"),true));

@@ -1,0 +1,7 @@
+export type TaskStatus="draft"|"assigned"|"in_progress"|"awaiting_review"|"completed"|"rejected"|"cancelled";
+export function canTransition(from:TaskStatus,to:TaskStatus){const allowed:Record<TaskStatus,TaskStatus[]>={draft:["assigned","cancelled"],assigned:["in_progress","awaiting_review","completed","cancelled"],in_progress:["awaiting_review","completed","cancelled"],awaiting_review:["completed","rejected"],completed:[],rejected:["in_progress","awaiting_review","completed","cancelled"],cancelled:[]};return allowed[from].includes(to)}
+export function completionStatus(reviewRequired:boolean):TaskStatus{return reviewRequired?"awaiting_review":"completed"}
+export function evidenceSatisfied(type:"none"|"photo"|"description"|"photo_and_description",description:string,photoCount:number){return type==="none"||(type==="photo"&&photoCount>0)||(type==="description"&&description.trim().length>0)||(type==="photo_and_description"&&photoCount>0&&description.trim().length>0)}
+export function canEditEvidence(createdAt:number,now:number,isOwner:boolean,override:boolean){return override||(isOwner&&now-createdAt<=60*60*1000)}
+export function effectiveStatus(status:TaskStatus,dueAt:number|null,now:number){return dueAt!==null&&dueAt<now&&!(["completed","cancelled"] as TaskStatus[]).includes(status)?"overdue":status}
+export function isAfterCursor(item:{createdAt:string;id:string},cursor:{createdAt:string;id:string}){return item.createdAt<cursor.createdAt||(item.createdAt===cursor.createdAt&&item.id<cursor.id)}
