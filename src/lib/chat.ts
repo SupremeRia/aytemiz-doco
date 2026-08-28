@@ -1,0 +1,3 @@
+import {createClient} from "@/lib/supabase/server";
+export type ChatMessage={id:string;station_id:string;sender_id:string;sender_name:string;sender_roles:string[];message:string;message_type:string;reply_to_message_id:string|null;reply_preview:string|null;created_at:string;updated_at:string;deleted_at:string|null;is_mine:boolean;can_edit:boolean;can_delete:boolean};
+export async function listMessages(stationId:string,options:{q?:string;cursorCreated?:string;cursorId?:string}={}){const supabase=await createClient();const{data,error}=await supabase.rpc("list_messages",{target_station:stationId,search_text:options.q??null,cursor_created:options.cursorCreated??null,cursor_id:options.cursorId??null,page_size:40});return{items:(data??[]) as ChatMessage[],error};}

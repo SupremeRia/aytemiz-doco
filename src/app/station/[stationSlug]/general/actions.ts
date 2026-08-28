@@ -1,0 +1,6 @@
+"use server";
+import {revalidatePath} from "next/cache";import {redirect} from "next/navigation";import {createClient} from "@/lib/supabase/server";
+const val=(f:FormData,k:string,n=4000)=>String(f.get(k)??"").trim().slice(0,n);function fail(p:string,m:string):never{redirect(`${p}?error=${encodeURIComponent(m)}`)}
+export async function sendMessageAction(form:FormData){const slug=val(form,"stationSlug",120),path=`/station/${slug}/general`,supabase=await createClient();const{error}=await supabase.rpc("send_message",{target_station:val(form,"stationId",36),message_text:val(form,"message"),reply_to:val(form,"replyTo",36)||null,idempotency_key:val(form,"idempotencyKey",36)});if(error)fail(path,error.message);revalidatePath(path)}
+export async function editMessageAction(form:FormData){const slug=val(form,"stationSlug",120),path=`/station/${slug}/general`,supabase=await createClient();const{error}=await supabase.rpc("edit_message",{target_message:val(form,"messageId",36),new_message:val(form,"message")});if(error)fail(path,error.message);revalidatePath(path)}
+export async function deleteMessageAction(form:FormData){const slug=val(form,"stationSlug",120),path=`/station/${slug}/general`,supabase=await createClient();const{error}=await supabase.rpc("delete_message",{target_message:val(form,"messageId",36)});if(error)fail(path,error.message);revalidatePath(path)}

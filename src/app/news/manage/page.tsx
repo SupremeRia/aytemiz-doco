@@ -1,0 +1,12 @@
+import Link from "next/link";
+import {ArrowLeft} from "lucide-react";
+import {notFound} from "next/navigation";
+import {Button,Card,FileUploader,Input,PageHeader,Select,Textarea} from "@/components/ui/primitives";
+import {getNewsFormData,listNews} from "@/lib/news";
+import {createNewsAction} from "../actions";
+
+export default async function NewsManage({searchParams}:{searchParams:Promise<{error?:string}>}){
+  const [query,data,news]=await Promise.all([searchParams,getNewsFormData(),listNews(undefined,50)]);
+  if(!data.canCreate)notFound();
+  return <main className="shell"><Link href="/admin" className="back-link"><ArrowLeft size={18}/>Yönetime dön</Link><PageHeader eyebrow="İçerik yönetimi" title="Haberler" description="Global, bölge veya istasyon kapsamındaki haberleri yayınlayın."/>{query.error?<p className="form-error">{query.error}</p>:null}<Card><form action={createNewsAction} className="grid gap-4" encType="multipart/form-data"><label>Başlık<Input name="title" required/></label><label>Özet<Textarea name="summary" required maxLength={500}/></label><label>İçerik<Textarea name="content" required rows={10}/></label><label>Kapak görseli<FileUploader name="cover" accept="image/jpeg,image/png,image/webp"/></label><div className="form-grid"><label>Kapsam<Select name="scope">{data.canCreateGlobal?<option value="global">Global</option>:null}{data.regions.length?<option value="region">Bölge</option>:null}{data.stations.length?<option value="station">İstasyon</option>:null}</Select></label><label>Durum<Select name="status"><option value="draft">Taslak</option><option value="scheduled">Planlandı</option><option value="published">Yayınla</option></Select></label><label>Bölge<Select name="regionId"><option value="">Seçin</option>{data.regions.map(item=><option key={item.id} value={item.id}>{item.name}</option>)}</Select></label><label>İstasyon<Select name="stationId"><option value="">Seçin</option>{data.stations.map(item=><option key={item.id} value={item.id}>{item.city} / {item.name}</option>)}</Select></label><label>Başlangıç<Input type="datetime-local" name="publishAt"/></label><label>Bitiş<Input type="datetime-local" name="expiresAt"/></label></div><Button>Haberi kaydet</Button></form></Card><section className="grid gap-3"><h2 className="section-title">Mevcut haberler</h2>{news.items.map(item=><Card key={item.id}><Link href={`/news/${item.id}/edit`}><strong>{item.title}</strong><p className="muted">{item.summary}</p><span className="back-link">Düzenle</span></Link></Card>)}</section></main>;
+}

@@ -82,6 +82,8 @@ Merkezi SQL sırası: OP > kullanıcı explicit deny > kullanıcı allow > rol a
 
 Repository'yi Vercel'e bağlayın, iki environment variable'ı Preview ve Production ortamlarına ekleyin, deploy edin. Sonra özel domain'i Vercel üzerinden bağlayın ve Supabase Auth redirect URL listesine ekleyin. Kodda production URL bulunmaz.
 
+Güncel production repository disiplini, `regue.xyz` durumu, ilerideki Netlify DNS adımları, Web Push environment değişkenleri ve manuel Supabase güvenlik kontrolü için [deployment kontrol listesine](docs/deployment.md) bakın.
+
 ## PWA Kurulumu
 
 Manifest, standalone modu, tema rengi, placeholder SVG ikon ve service worker hazırdır. Service worker yalnızca aynı origin'deki statik asset'leri cache'ler; oturumlu sayfalar, gezinme cevapları ve API verileri cache'e alınmaz. Production'da HTTPS altında kurulum yapılabilir.
@@ -106,6 +108,6 @@ Safari'de siteyi açın, **Paylaş** > **Ana Ekrana Ekle** yolunu izleyin. iOS P
 - Soft delete alanları profile kaydını audit için korur. Auth hard delete ayrı ve secret server-side işlem gerektirir; foundation buna bilerek public endpoint eklemez.
 - Proxy oturumu yeniler ve kaba route koruması sağlar; yetkilendirme her zaman RLS'de tekrar uygulanır.
 
-## Foundation Kapsamı
+## Güncel modüller
 
-Çalışan ekranlar: login, register, pending, mobil dashboard, atanmış istasyon listesi, station workspace placeholder'ları ve admin bölüm menüsü. Mesajlaşma, duyuru, görev, dosya yükleme ve ayrıntılı admin CRUD formları sonraki faz içindir; tablolar ve station isolation temeli hazırdır.
+Çalışan ekranlar login/register, dashboard, istasyon alanları, görevler, operasyon fotoğrafları, duyurular, bildirim merkezi, genel ekip sohbeti, private dosyalar, kurumsal haberler, yönetim ve kullanıcıya bağlı çevrimdışı taslak altyapısını kapsar.

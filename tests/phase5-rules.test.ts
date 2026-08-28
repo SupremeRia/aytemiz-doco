@@ -1,0 +1,27 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {canDeleteChat,canEditChat,idempotentResult,offlineKey,ownsPushEndpoint,sameStation,scopeMatches,visibleNews,withinEditWindow} from "../src/lib/phase5-rules.ts";
+import {validateFileSignature,validateMediaFile} from "../src/lib/media/validation.ts";
+
+test("chat is isolated by station",()=>assert.equal(sameStation("a",["b"]),false));
+test("realtime station boundary accepts assigned station",()=>assert.equal(sameStation("a",["a"]),true));
+test("chat edit window allows exactly 60 minutes",()=>assert.equal(withinEditWindow(0,3_600_000),true));
+test("chat edit window rejects older message",()=>assert.equal(withinEditWindow(0,3_600_001),false));
+test("owner edits within window",()=>assert.equal(canEditChat(true,true,false),true));
+test("owner cannot edit after window",()=>assert.equal(canEditChat(true,false,false),false));
+test("moderator can edit after window",()=>assert.equal(canEditChat(false,false,true),true));
+test("soft delete is available to owner",()=>assert.equal(canDeleteChat(true,false),true));
+test("moderator can delete foreign message",()=>assert.equal(canDeleteChat(false,true),true));
+test("station file visibility is isolated",()=>assert.equal(sameStation("a",["b","c"]),false));
+test("executable upload is rejected",()=>assert.equal(validateMediaFile("bad.exe","application/octet-stream",12).ok,false));
+test("forged PNG signature is rejected",()=>assert.equal(validateFileSignature(new Uint8Array([1,2,3]),"png"),false));
+test("valid PDF signature is accepted",()=>assert.equal(validateFileSignature(new Uint8Array([0x25,0x50,0x44,0x46]),"pdf"),true));
+test("future news is not visible",()=>assert.equal(visibleNews(101,null,100),false));
+test("expired news is not visible",()=>assert.equal(visibleNews(1,99,100),false));
+test("global news matches every scope",()=>assert.equal(scopeMatches("global",null,[],[]),true));
+test("regional news requires region assignment",()=>assert.equal(scopeMatches("region","r1",["r2"],[]),false));
+test("station news matches assigned station",()=>assert.equal(scopeMatches("station","s1",[],["s1"]),true));
+test("push endpoint cannot move between users",()=>assert.equal(ownsPushEndpoint("u1","u2"),false));
+test("push endpoint can be refreshed by owner",()=>assert.equal(ownsPushEndpoint("u1","u1"),true));
+test("idempotency returns existing result",()=>assert.equal(idempotentResult("old","new"),"old"));
+test("offline records are separated by user",()=>assert.notEqual(offlineKey("u1","chat","s1"),offlineKey("u2","chat","s1")));

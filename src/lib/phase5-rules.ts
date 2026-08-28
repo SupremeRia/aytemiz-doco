@@ -1,0 +1,9 @@
+export const sameStation=(messageStation:string,viewerStations:string[])=>viewerStations.includes(messageStation);
+export const withinEditWindow=(createdAt:number,now:number,minutes=60)=>now-createdAt<=minutes*60_000;
+export const canEditChat=(own:boolean,withinWindow:boolean,moderate:boolean)=>moderate||(own&&withinWindow);
+export const canDeleteChat=(own:boolean,moderate:boolean)=>own||moderate;
+export const visibleNews=(publishedAt:number,expiresAt:number|null,now:number)=>publishedAt<=now&&(expiresAt===null||expiresAt>now);
+export const scopeMatches=(scope:"global"|"region"|"station",scopeId:string|null,regions:string[],stations:string[])=>scope==="global"||(scope==="region"?regions.includes(scopeId??""):stations.includes(scopeId??""));
+export const ownsPushEndpoint=(existingUser:string|null,currentUser:string)=>existingUser===null||existingUser===currentUser;
+export const idempotentResult=<T>(existing:T|null,created:T)=>existing??created;
+export const offlineKey=(userId:string,kind:string,stationId:string)=>`${userId}:draft:${kind}:${stationId}`;

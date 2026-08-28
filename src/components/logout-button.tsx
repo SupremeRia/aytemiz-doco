@@ -4,6 +4,7 @@ import { useState } from "react";
 import { LogOut, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { clearAllOfflineData } from "@/lib/offline-store";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export function LogoutButton() {
   async function logout() {
     setBusy(true);
     const supabase = createClient();
+    await clearAllOfflineData();
     const { error } = await supabase.auth.signOut({ scope: "local" });
 
     if (error) {
