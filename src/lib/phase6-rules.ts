@@ -1,0 +1,14 @@
+export const stationScoped=(recordStation:string,allowed:string[])=>allowed.includes(recordStation);
+export const uniqueKey=(...parts:(string|null)[])=>parts.join(':');
+export const canSubmitHandover=(draft:boolean,authorized:boolean,hasItems:boolean)=>draft&&authorized&&hasItems;
+export const acknowledge=(users:Set<string>,user:string)=>new Set([...users,user]);
+export const criticalHandover=(conditions:string[])=>conditions.includes('issue');
+export const templateVisible=(scope:string,id:string|null,station:string,region:string)=>scope==='global'||(scope==='station'&&id===station)||(scope==='region'&&id===region);
+export const canCompleteChecklist=(items:{required:boolean;status:string;photoRequired?:boolean;photos?:number}[])=>items.every(x=>!x.required||(['completed','issue'].includes(x.status)&&(!x.photoRequired||(x.photos??0)>0)));
+export const checklistOverdue=(date:number,now:number,status:string)=>date<now&&!['completed','cancelled'].includes(status);
+export const canTransitionIssue=(from:string,to:string)=>({open:['investigating','waiting_service','resolved','cancelled'],investigating:['waiting_service','resolved','cancelled'],waiting_service:['investigating','resolved','cancelled'],resolved:['closed','investigating'],closed:[],cancelled:[]} as Record<string,string[]>)[from]?.includes(to)??false;
+export const sourceTaskKey=(kind:string,id:string)=>`${kind}:${id}`;
+export const deduplicate=<T>(items:T[])=>[...new Set(items)];
+export const dailyRate=(done:number,total:number)=>total?Math.round(done/total*100):0;
+export const canEditNote=(owner:boolean,created:number,now:number,override:boolean)=>override||(owner&&now-created<=3_600_000);
+export const offlineDraftKey=(user:string,station:string,kind:string)=>`${user}:draft:${kind}:${station}`;

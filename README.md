@@ -2,6 +2,8 @@
 
 Aytemiz DOCO istasyonları için mobil öncelikli, installable PWA ekip ve istasyon yönetimi foundation'ı. Next.js frontend ile Supabase backend birbirinden ayrıdır; production domain kodda sabit değildir.
 
+Operasyon kapsamı vardiya devir teslimi, günlük checklistler, arıza/bakım timeline’ı ve istasyon günlük raporunu içerir.
+
 ## Gereksinimler
 
 - Node.js 22+

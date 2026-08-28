@@ -35,3 +35,9 @@ Netlify'ın gösterdiği hedefler zamanla değişebileceği için DNS değerleri
 - `SUPABASE_SERVICE_ROLE_KEY`: yalnızca server-only push dağıtımı
 
 Private VAPID ve service-role değerleri hiçbir `NEXT_PUBLIC_` değişkenine yazılmaz.
+
+## Faz 6 production checkpoint
+
+- Devir teslim, checklist, arıza/bakım ve günlük rapor route’ları Faz 5 ile aynı production checkpoint içinde yayınlanmalıdır.
+- Service role yalnız server-side yüksek değerli push dağıtımında kullanılır. Normal işlemler authenticated oturum, permission engine ve RLS üzerinden çalışır.
+- Production push öncesinde typecheck, lint, tüm testler, build, DB lint, advisor ve migration alignment yeniden doğrulanmalıdır.
