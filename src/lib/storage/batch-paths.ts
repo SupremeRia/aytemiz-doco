@@ -15,9 +15,14 @@ export function groupStoragePaths(items: StoragePath[]) {
 export async function createSignedUrlMap(items:StoragePath[],expiresIn:number,sign:(bucket:string,paths:string[],expiresIn:number)=>Promise<SignedUrlBatch>){
   const urls=new Map<string,string>();
   await Promise.all([...groupStoragePaths(items)].map(async([bucket,paths])=>{
-    const{data,error}=await sign(bucket,paths,expiresIn);
-    if(error)throw error;
-    for(const item of data??[])if(item.path&&item.signedUrl)urls.set(`${bucket}:${item.path}`,item.signedUrl);
+    try{
+      const{data,error}=await sign(bucket,paths,expiresIn);
+      if(error)throw error;
+      for(const item of data??[])if(item.path&&item.signedUrl)urls.set(`${bucket}:${item.path}`,item.signedUrl);
+    }catch(error){
+      const safe=error&&typeof error==="object"?(error as {code?:string}):{};
+      console.error("[storage.signed-url]",{bucket,code:safe.code??"unknown"});
+    }
   }));
   return urls;
 }

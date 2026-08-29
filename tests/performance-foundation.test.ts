@@ -65,7 +65,17 @@ test("signed URLs are batched once per bucket and duplicate path",async()=>{
 
 test("signed URL empty and failure behavior is explicit",async()=>{
   assert.deepEqual([...(await createSignedUrlMap([],900,async()=>({data:[],error:null})))],[]);
-  await assert.rejects(()=>createSignedUrlMap([{bucket:"a",path:"1"}],900,async()=>({data:null,error:new Error("storage unavailable")})),/storage unavailable/);
+  const urls=await createSignedUrlMap([{bucket:"a",path:"1"}],900,async()=>({data:null,error:new Error("storage unavailable")}));
+  assert.equal(urls.has("a:1"),false);
+});
+
+test("a failing bucket's signed URL error does not drop other buckets' results",async()=>{
+  const urls=await createSignedUrlMap([{bucket:"broken",path:"1"},{bucket:"ok",path:"2"}],900,async(bucket,paths)=>{
+    if(bucket==="broken")return{data:null,error:new Error("storage unavailable")};
+    return{data:paths.map(path=>({path,signedUrl:`${bucket}/${path}`})),error:null};
+  });
+  assert.equal(urls.has("broken:1"),false);
+  assert.equal(urls.get("ok:2"),"ok/2");
 });
 
 test("bounded concurrency never exceeds configured limit",async()=>{
@@ -80,4 +90,40 @@ test("data access errors preserve safe operation metadata without raw messages",
   finally{console.error=original}
   assert.equal(JSON.stringify(logs).includes("private payload"),false);
   assert.match(JSON.stringify(logs),/tasks\.list/);
+});
+
+test("permission-denied data errors are classified separately from transient failures",()=>{
+  const original=console.error;console.error=()=>{};
+  try{
+    assert.throws(()=>failDataAccess("announcements.list",{code:"42501"}),(error:unknown)=>error instanceof DataAccessError&&error.kind==="permission"&&error.digest===`permission:${error.incidentId}`);
+    assert.throws(()=>failDataAccess("news.list",{code:"PGRST116",status:500}),(error:unknown)=>error instanceof DataAccessError&&error.kind==="transient"&&error.digest===`transient:${error.incidentId}`);
+  }finally{console.error=original}
+});
+
+test("expired or missing auth sessions resolve to no user instead of a hard error",async()=>{
+  const source=await readFile(new URL("../src/lib/data.ts",import.meta.url),"utf8");
+  assert.match(source,/error\.name\s*!==\s*["']AuthSessionMissingError["']/);
+});
+
+test("dashboard isolates optional widgets from the critical session/profile/authorization path",async()=>{
+  const source=await readFile(new URL("../src/app/dashboard/page.tsx",import.meta.url),"utf8");
+  assert.match(source,/loadOptional\(getDashboardContent\(\)/);
+  assert.match(source,/loadOptional\(listNews\(/);
+  assert.doesNotMatch(source,/loadOptional\(getMyStations\(\)/);
+  assert.doesNotMatch(source,/loadOptional\(getProfile\(\)/);
+  assert.doesNotMatch(source,/loadOptional\(hasAdminAccess\(\)/);
+  assert.match(source,/stations\.length\?/);
+});
+
+test("notification unread count failure keeps navigation working instead of crashing it",async()=>{
+  const source=await readFile(new URL("../src/components/app-nav.tsx",import.meta.url),"utf8");
+  assert.match(source,/catch\s*\(error\)\s*\{[\s\S]*return 0/);
+});
+
+test("the error boundary surfaces a support code and retries via a fresh render",async()=>{
+  const source=await readFile(new URL("../src/app/error.tsx",import.meta.url),"utf8");
+  assert.match(source,/Destek kodu/);
+  assert.match(source,/permission:/);
+  assert.doesNotMatch(source,/İnternet bağlantınızı kontrol edip yeniden deneyin/);
+  assert.match(source,/onClick=\{reset\}/);
 });

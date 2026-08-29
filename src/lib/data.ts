@@ -6,7 +6,7 @@ import type { Station } from "@/types/database";
 const getCurrentUser = cache(async () => {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
-  if (error) failDataAccess("auth.user", error);
+  if (error && error.name !== "AuthSessionMissingError") failDataAccess("auth.user", error);
   return data.user;
 });
 
