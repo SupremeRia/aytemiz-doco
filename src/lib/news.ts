@@ -1,18 +1,17 @@
 import { failDataAccess } from "@/lib/observability";
-import { groupStoragePaths } from "@/lib/storage/batch-paths";
+import { createSignedUrlMap } from "@/lib/storage/batch-paths";
 import { createClient } from "@/lib/supabase/server";
 
 export type NewsPost = { id:string; title:string; summary:string; content:string; scope_type:string; publish_at:string; expires_at:string|null; creator_name:string; cover_bucket:string|null; cover_path:string|null; cover_url?:string };
 
 async function attachCoverUrls(items: NewsPost[]) {
   const supabase = await createClient();
-  const groups = groupStoragePaths(items.flatMap((item) => item.cover_bucket && item.cover_path ? [{ bucket: item.cover_bucket, path: item.cover_path }] : []));
-  const signedByPath = new Map<string, string>();
-  await Promise.all([...groups].map(async ([bucket, paths]) => {
-    const { data, error } = await supabase.storage.from(bucket).createSignedUrls(paths, 900);
-    if (error) failDataAccess("news.cover-urls", error);
-    for (const signed of data ?? []) if (signed.signedUrl) signedByPath.set(`${bucket}:${signed.path}`, signed.signedUrl);
-  }));
+  let signedByPath: Map<string, string>;
+  try {
+    signedByPath = await createSignedUrlMap(items.flatMap((item) => item.cover_bucket && item.cover_path ? [{ bucket: item.cover_bucket, path: item.cover_path }] : []), 900, (bucket, paths, expires) => supabase.storage.from(bucket).createSignedUrls(paths, expires));
+  } catch (error) {
+    failDataAccess("news.cover-urls", error);
+  }
   return items.map((item) => ({
     ...item,
     cover_url: item.cover_bucket && item.cover_path ? signedByPath.get(`${item.cover_bucket}:${item.cover_path}`) : undefined,

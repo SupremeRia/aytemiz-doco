@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Geist } from "next/font/google";
-import { PwaRegister } from "@/components/pwa-register";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -9,5 +9,5 @@ export const metadata: Metadata = { title:{default:"Aytemiz Doco",template:"%s |
 export const viewport: Viewport = { themeColor:"#0b0c0f", colorScheme:"dark" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return <html lang="tr" className={geist.variable}><body><PwaRegister />{children}</body></html>;
+  return <html lang="tr" className={geist.variable}><body><ServiceWorkerRegister />{children}</body></html>;
 }

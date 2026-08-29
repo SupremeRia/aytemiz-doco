@@ -1,0 +1,4 @@
+[context.production.environment]
+  # Turbopack's private build cache is not part of the public deploy output.
+  # Keep secret scanning enabled for repository code and deployable artifacts.
+  SECRETS_SCAN_OMIT_PATHS = ".netlify/.next/cache/**"
