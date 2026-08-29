@@ -1,6 +1,67 @@
-import {createClient} from "@/lib/supabase/server";
-export type NewsPost={id:string;title:string;summary:string;content:string;scope_type:string;publish_at:string;expires_at:string|null;creator_name:string;cover_bucket:string|null;cover_path:string|null;cover_url?:string};
-export async function listNews(stationId?:string,limit=12){const supabase=await createClient();const{data,error}=await supabase.rpc("list_news",{target_station:stationId??null,page_size:limit});const items=await Promise.all(((data??[]) as NewsPost[]).map(async n=>{if(!n.cover_bucket||!n.cover_path)return n;const{data:s}=await supabase.storage.from(n.cover_bucket).createSignedUrl(n.cover_path,900);return{...n,cover_url:s?.signedUrl}}));return{items,error}}
-export async function getNews(id:string){const{items,error}=await listNews(undefined,50);return{item:items.find(x=>x.id===id)??null,error}}
-export async function getNewsFormData(){const supabase=await createClient();const[{data:globalPermission},{data:regions},{data:stations}]=await Promise.all([supabase.rpc("can_in_scope",{permission_slug:"news.create",check_station:null,check_region:null}),supabase.from("regions").select("id,name").eq("is_active",true),supabase.from("stations").select("id,name,city,region_id").eq("is_active",true).is("deleted_at",null)]);const regionChecks=await Promise.all((regions??[]).map(async region=>(await supabase.rpc("can_in_scope",{permission_slug:"news.create",check_station:null,check_region:region.id})).data===true));const stationChecks=await Promise.all((stations??[]).map(async station=>(await supabase.rpc("can_in_scope",{permission_slug:"news.create",check_station:station.id,check_region:station.region_id})).data===true));const allowedRegions=(regions??[]).filter((_,index)=>regionChecks[index]),allowedStations=(stations??[]).filter((_,index)=>stationChecks[index]);return{canCreate:globalPermission===true||allowedRegions.length>0||allowedStations.length>0,canCreateGlobal:globalPermission===true,regions:allowedRegions,stations:allowedStations}}
-export async function getEditableNews(id:string){const supabase=await createClient();const{data:item,error}=await supabase.from("news_posts").select("id,title,summary,content,status,publish_at,expires_at,station_id,region_id").eq("id",id).is("deleted_at",null).maybeSingle();if(!item)return{item:null,error};const{data:canEdit}=await supabase.rpc("can_in_scope",{permission_slug:"news.edit",check_station:item.station_id,check_region:item.region_id});return{item:canEdit===true?item:null,error}}
+import { failDataAccess } from "@/lib/observability";
+import { groupStoragePaths } from "@/lib/storage/batch-paths";
+import { createClient } from "@/lib/supabase/server";
+
+export type NewsPost = { id:string; title:string; summary:string; content:string; scope_type:string; publish_at:string; expires_at:string|null; creator_name:string; cover_bucket:string|null; cover_path:string|null; cover_url?:string };
+
+async function attachCoverUrls(items: NewsPost[]) {
+  const supabase = await createClient();
+  const groups = groupStoragePaths(items.flatMap((item) => item.cover_bucket && item.cover_path ? [{ bucket: item.cover_bucket, path: item.cover_path }] : []));
+  const signedByPath = new Map<string, string>();
+  await Promise.all([...groups].map(async ([bucket, paths]) => {
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrls(paths, 900);
+    if (error) failDataAccess("news.cover-urls", error);
+    for (const signed of data ?? []) if (signed.signedUrl) signedByPath.set(`${bucket}:${signed.path}`, signed.signedUrl);
+  }));
+  return items.map((item) => ({
+    ...item,
+    cover_url: item.cover_bucket && item.cover_path ? signedByPath.get(`${item.cover_bucket}:${item.cover_path}`) : undefined,
+  }));
+}
+
+export async function listNews(stationId?: string, limit = 12) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("list_news", { target_station: stationId ?? null, page_size: limit });
+  if (error) failDataAccess("news.list", error);
+  return { items: await attachCoverUrls((data ?? []) as NewsPost[]), error: null };
+}
+
+export async function getNews(id: string) {
+  const { items, error } = await listNews(undefined, 50);
+  return { item: items.find((item) => item.id === id) ?? null, error };
+}
+
+export async function getNewsFormData() {
+  const supabase = await createClient();
+  const [permission, regions, stations] = await Promise.all([
+    supabase.rpc("can_in_scope", { permission_slug: "news.create", check_station: null, check_region: null }),
+    supabase.from("regions").select("id,name").eq("is_active", true),
+    supabase.from("stations").select("id,name,city,region_id").eq("is_active", true).is("deleted_at", null),
+  ]);
+  if (permission.error) failDataAccess("news.permission.global", permission.error);
+  if (regions.error) failDataAccess("news.regions", regions.error);
+  if (stations.error) failDataAccess("news.stations", stations.error);
+  const regionChecks = await Promise.all((regions.data ?? []).map(async (region) => {
+    const result = await supabase.rpc("can_in_scope", { permission_slug: "news.create", check_station: null, check_region: region.id });
+    if (result.error) failDataAccess("news.permission.region", result.error);
+    return result.data === true;
+  }));
+  const stationChecks = await Promise.all((stations.data ?? []).map(async (station) => {
+    const result = await supabase.rpc("can_in_scope", { permission_slug: "news.create", check_station: station.id, check_region: station.region_id });
+    if (result.error) failDataAccess("news.permission.station", result.error);
+    return result.data === true;
+  }));
+  const allowedRegions = (regions.data ?? []).filter((_, index) => regionChecks[index]);
+  const allowedStations = (stations.data ?? []).filter((_, index) => stationChecks[index]);
+  return { canCreate: permission.data === true || allowedRegions.length > 0 || allowedStations.length > 0, canCreateGlobal: permission.data === true, regions: allowedRegions, stations: allowedStations };
+}
+
+export async function getEditableNews(id: string) {
+  const supabase = await createClient();
+  const { data: item, error } = await supabase.from("news_posts").select("id,title,summary,content,status,publish_at,expires_at,station_id,region_id").eq("id", id).is("deleted_at", null).maybeSingle();
+  if (error) failDataAccess("news.editable", error);
+  if (!item) return { item: null, error: null };
+  const permission = await supabase.rpc("can_in_scope", { permission_slug: "news.edit", check_station: item.station_id, check_region: item.region_id });
+  if (permission.error) failDataAccess("news.permission.edit", permission.error);
+  return { item: permission.data === true ? item : null, error: null };
+}
