@@ -4,6 +4,7 @@ import test from "node:test";
 import { createSignedUrlMap, groupStoragePaths } from "../src/lib/storage/batch-paths.ts";
 import { mapWithConcurrency } from "../src/lib/concurrency.ts";
 import { DataAccessError, failDataAccess } from "../src/lib/observability.ts";
+import { loadOptionalData } from "../src/lib/optional-data.ts";
 import { getSupabaseEnv, hasSupabaseEnv } from "../src/lib/supabase/config.ts";
 
 test("news cover paths are batched once per bucket", () => {
@@ -107,17 +108,38 @@ test("expired or missing auth sessions resolve to no user instead of a hard erro
 
 test("dashboard isolates optional widgets from the critical session/profile/authorization path",async()=>{
   const source=await readFile(new URL("../src/app/dashboard/page.tsx",import.meta.url),"utf8");
-  assert.match(source,/loadOptional\(getDashboardContent\(\)/);
-  assert.match(source,/loadOptional\(listNews\(/);
-  assert.doesNotMatch(source,/loadOptional\(getMyStations\(\)/);
-  assert.doesNotMatch(source,/loadOptional\(getProfile\(\)/);
-  assert.doesNotMatch(source,/loadOptional\(hasAdminAccess\(\)/);
-  assert.match(source,/stations\.length\?/);
+  assert.match(source,/loadOptionalData\(getDashboardContent\(\)/);
+  assert.match(source,/loadOptionalData\(listNews\(/);
+  assert.doesNotMatch(source,/loadOptionalData\(getMyStations\(\)/);
+  assert.doesNotMatch(source,/loadOptionalData\(getProfile\(\)/);
+  assert.doesNotMatch(source,/loadOptionalData\(hasAdminAccess\(\)/);
+  assert.match(source,/stations\.length\s*\?/);
 });
 
-test("notification unread count failure keeps navigation working instead of crashing it",async()=>{
+test("optional data fallbacks only handle expected DataAccessError failures",async()=>{
+  const original=console.error;console.error=()=>{};
+  try{
+    const expected=new DataAccessError("news.list","incident","transient");
+    assert.equal(await loadOptionalData(Promise.reject(expected),"fallback","dashboard.news"),"fallback");
+    const typeError=new TypeError("programming failure");
+    await assert.rejects(loadOptionalData(Promise.reject(typeError),"fallback","dashboard.news"),error=>error===typeError);
+    const redirectError=Object.assign(new Error("NEXT_REDIRECT"),{digest:"NEXT_REDIRECT;replace;/login;307;"});
+    await assert.rejects(loadOptionalData(Promise.reject(redirectError),"fallback","dashboard.news"),error=>error===redirectError);
+  }finally{console.error=original}
+});
+
+test("notification unread count uses the strict optional data boundary",async()=>{
   const source=await readFile(new URL("../src/components/app-nav.tsx",import.meta.url),"utf8");
-  assert.match(source,/catch\s*\(error\)\s*\{[\s\S]*return 0/);
+  assert.match(source,/loadOptionalData\(getNotificationUnreadCount\(\),\s*0/);
+});
+
+test("Geist is self-hosted and build has no Google Fonts dependency",async()=>{
+  const source=await readFile(new URL("../src/app/layout.tsx",import.meta.url),"utf8");
+  const license=await readFile(new URL("../src/app/fonts/LICENSE.txt",import.meta.url),"utf8");
+  assert.doesNotMatch(source,/next\/font\/google/);
+  assert.match(source,/next\/font\/local/);
+  assert.match(source,/Geist-Variable\.woff2/);
+  assert.match(license,/SIL OPEN FONT LICENSE Version 1\.1/);
 });
 
 test("the error boundary surfaces a support code and retries via a fresh render",async()=>{
