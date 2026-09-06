@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>İyi ki Doğdun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1c0f16;
+    --surface:#2b1620;
+    --surface-2:#35192a;
+    --text:#f3e6de;
+    --text-dim:#c9a3ac;
+    --accent:#d9a25c;
+    --accent-2:#e2879a;
+    --line:rgba(243,230,222,.14);
+    --shadow:rgba(0,0,0,.45);
+    --polaroid-bg:#f7ecdf;
+    --polaroid-ink:#3a2420;
+    --polaroid-ink-dim:#8a6a63;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#fbf1e7;
+      --surface:#ffffff;
+      --surface-2:#fdf5ec;
+      --text:#2b1620;
+      --text-dim:#6b4a52;
+      --accent:#c17a3d;
+      --accent-2:#b23e5e;
+      --line:rgba(43,22,32,.12);
+      --shadow:rgba(43,22,32,.18);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#fbf1e7;
+    --surface:#ffffff;
+    --surface-2:#fdf5ec;
+    --text:#2b1620;
+    --text-dim:#6b4a52;
+    --accent:#c17a3d;
+    --accent-2:#b23e5e;
+    --line:rgba(43,22,32,.12);
+    --shadow:rgba(43,22,32,.18);
+  }
+  :root[data-theme="dark"]{
+    --bg:#1c0f16;
+    --surface:#2b1620;
+    --surface-2:#35192a;
+    --text:#f3e6de;
+    --text-dim:#c9a3ac;
+    --accent:#d9a25c;
+    --accent-2:#e2879a;
+    --line:rgba(243,230,222,.14);
+    --shadow:rgba(0,0,0,.45);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Manrope',system-ui,sans-serif;
+    overflow:hidden;
+    height:100dvh;
+    width:100vw;
+  }
+
+  .stage{
+    position:relative;
+    height:100dvh;
+    width:100vw;
+    overflow:hidden;
+  }
+
+  .embers{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:1; }
+  .ember{
+    position:absolute;
+    bottom:-5%;
+    left:var(--x,50%);
+    width:var(--s,4px);
+    height:var(--s,4px);
+    border-radius:50%;
+    background:radial-gradient(circle, var(--accent), transparent 70%);
+    opacity:0;
+    animation:rise var(--d,12s) linear var(--delay,0s) infinite;
+  }
+  @keyframes rise{
+    0%{ transform:translate(0,0); opacity:0; }
+    8%{ opacity:.55; }
+    85%{ opacity:.4; }
+    100%{ transform:translate(var(--x-drift,20px), -108vh); opacity:0; }
+  }
+  .finale .ember{ opacity:.6; }
+
+  .deck{
+    position:absolute;
+    inset:0;
+    display:flex;
+    width:400%;
+    height:100%;
+    transition:transform .7s cubic-bezier(.65,0,.35,1);
+    z-index:2;
+  }
+  .slide{
+    width:25%;
+    height:100%;
+    flex:0 0 25%;
+    display:flex;
+    align-items:center;
+    gap:clamp(2rem,6vw,5rem);
+    padding:clamp(1.75rem,6vw,5rem);
+  }
+  .slide.reverse{ flex-direction:row-reverse; }
+  .slide.center{ flex-direction:column; justify-content:center; text-align:center; gap:clamp(1.25rem,3vw,2rem); }
+
+  .copy{ max-width:46ch; }
+  .slide.center .copy{ max-width:52ch; margin:0 auto; }
+
+  .eyebrow{
+    font-family:'Manrope',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.72rem;
+    font-weight:700;
+    color:var(--accent);
+    margin:0 0 .9rem;
+  }
+  .headline{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:clamp(1.9rem,4.6vw,3.2rem);
+    line-height:1.12;
+    text-wrap:balance;
+    margin:0 0 1.1rem;
+    color:var(--text);
+  }
+  .headline .lede{
+    font-style:italic;
+    color:var(--accent-2);
+  }
+  .body-text{
+    font-size:clamp(1rem,1.5vw,1.14rem);
+    line-height:1.75;
+    color:var(--text-dim);
+    margin:0;
+  }
+  .slide.center .headline{ font-size:clamp(1.7rem,4.2vw,2.7rem); }
+
+  .photo-frame{
+    flex:0 0 auto;
+    width:min(280px,72vw);
+    background:var(--polaroid-bg);
+    padding:14px 14px 46px;
+    box-shadow:0 24px 48px -16px var(--shadow), 0 2px 10px rgba(0,0,0,.22);
+    position:relative;
+    transform:rotate(var(--tilt,0deg));
+  }
+  .slide.center .photo-frame{ width:min(300px,74vw); margin:0 auto; }
+  .photo-window{
+    position:relative;
+    width:100%;
+    aspect-ratio:4/5;
+    background:linear-gradient(160deg,var(--surface-2),var(--surface));
+    overflow:hidden;
+  }
+  .photo-window img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .photo-fallback{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:.6rem;
+    padding:1rem;
+    text-align:center;
+    color:var(--polaroid-ink-dim);
+  }
+  .photo-fallback .mark{
+    width:34px; height:34px;
+    border:1.5px solid currentColor;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:1rem;
+  }
+  .photo-fallback .file{
+    font-size:.68rem;
+    letter-spacing:.06em;
+    font-family:'Manrope',sans-serif;
+  }
+  .photo-caption{
+    position:absolute;
+    left:0; right:0; bottom:12px;
+    text-align:center;
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:.92rem;
+    color:var(--polaroid-ink);
+  }
+
+  .nav-arrow{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:5;
+    width:44px; height:44px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:color-mix(in srgb, var(--surface) 70%, transparent);
+    backdrop-filter:blur(6px);
+    color:var(--text);
+    font-size:1.4rem;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .2s, border-color .2s;
+  }
+  .nav-arrow:hover{ border-color:var(--accent); }
+  .nav-arrow:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .nav-arrow.prev{ left:clamp(.6rem,3vw,2rem); }
+  .nav-arrow.next{ right:clamp(.6rem,3vw,2rem); }
+
+  .deck-footer{
+    position:absolute;
+    left:0; right:0; bottom:clamp(1rem,3vh,2rem);
+    z-index:5;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.6rem;
+  }
+  .counter{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:.85rem;
+    color:var(--text-dim);
+    font-variant-numeric:tabular-nums;
+    letter-spacing:.02em;
+  }
+  .counter-sep{ margin:0 .4em; opacity:.5; }
+  .dots{ display:flex; gap:.5rem; }
+  .dot{
+    width:7px; height:7px;
+    border-radius:50%;
+    border:none;
+    background:var(--line);
+    cursor:pointer;
+    padding:0;
+    transition:background .25s, transform .25s;
+  }
+  .dot[aria-current="true"]{
+    background:var(--accent);
+    transform:scale(1.35);
+  }
+  .dot:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+  @media (max-width: 720px){
+    .slide, .slide.reverse{
+      flex-direction:column;
+      justify-content:center;
+      text-align:center;
+      gap:1.5rem;
+    }
+    .copy{ max-width:38ch; margin:0 auto; }
+    .photo-frame{ order:-1; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .deck{ transition:none; }
+    .ember{ animation:none; opacity:0; }
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="embers" id="embers" aria-hidden="true"></div>
+
+  <div class="deck" id="deck">
+
+    <section class="slide" data-index="0" aria-label="1 / 4">
+      <div class="copy">
+        <p class="eyebrow">İyi ki doğdun</p>
+        <p class="headline"><span class="lede">Güzelim,</span> iyi ki doğdun, iyi ki hayatıma girdin ve iyi ki bana denk geldin. <span aria-hidden="true">❤️</span></p>
+      </div>
+      <div class="photo-frame" style="--tilt:-3deg">
+        <div class="photo-window">
+          <img src="dogum-gunu/foto1.jpg" alt="Gece, yan yana çekilmiş bir selfie" onerror="this.remove()">
+          <div class="photo-fallback">
+            <span class="mark">1</span>
+            <span class="file">dogum-gunu/foto1.jpg</span>
+          </div>
+        </div>
+        <p class="photo-caption">gece, yan yana</p>
+      </div>
+    </section>
+
+    <section class="slide reverse" data-index="1" aria-label="2 / 4">
+      <div class="copy">
+        <p class="eyebrow">6 ay</p>
+        <p class="body-text">Seninle geçirdiğim bu 6 ayda çokça maceramız, çokça güldüğümüz anımız ve bazen de tedirgin olduğumuz zamanlarımız oldu. Uzakta olsak da her anımda yanımda olduğunu hissettirdin. Her şey için, bana kattığın bütün güzellikler için sana çok teşekkür ederim.</p>
+      </div>
+      <div class="photo-frame" style="--tilt:2.5deg">
+        <div class="photo-window">
+          <img src="dogum-gunu/foto2.jpg" alt="Kumsalda, güneşli bir öğleden sonra" onerror="this.remove()">
+          <div class="photo-fallback">
+            <span class="mark">2</span>
+            <span class="file">dogum-gunu/foto2.jpg</span>
+          </div>
+        </div>
+        <p class="photo-caption">kumsalda, öğleden sonra</p>
+      </div>
+    </section>
+
+    <section class="slide" data-index="2" aria-label="3 / 4">
+      <div class="copy">
+        <p class="eyebrow">uzaklık</p>
+        <p class="body-text">Bazen mesafeler zor geliyor, bazen birbirimize sarılmayı, yan yana olmayı çok özlüyorum. Ama bütün bunlara rağmen hâlâ mutluyuz, huzurluyuz ve birlikteyiz. Umarım bundan sonra da daha nice güzel anılar, maceralar ve doğum günleri paylaşırız.</p>
+      </div>
+      <div class="photo-frame" style="--tilt:-2deg">
+        <div class="photo-window">
+          <img src="dogum-gunu/foto3.jpg" alt="Odada, kahkaha atarken çekilmiş bir selfie" onerror="this.remove()">
+          <div class="photo-fallback">
+            <span class="mark">3</span>
+            <span class="file">dogum-gunu/foto3.jpg</span>
+          </div>
+        </div>
+        <p class="photo-caption">odada, kahkaha</p>
+      </div>
+    </section>
+
+    <section class="slide center" data-index="3" aria-label="4 / 4">
+      <div class="photo-frame" style="--tilt:0deg">
+        <div class="photo-window">
+          <img src="dogum-gunu/foto4.jpg" alt="Akşam, yan yana çekilmiş bir fotoğraf" onerror="this.remove()">
+          <div class="photo-fallback">
+            <span class="mark">4</span>
+            <span class="file">dogum-gunu/foto4.jpg</span>
+          </div>
+        </div>
+        <p class="photo-caption">akşam, yan yana</p>
+      </div>
+      <div class="copy">
+        <p class="eyebrow">iyi ki</p>
+        <p class="body-text">İyi ki varsın güzelim. Seni çok seviyorum. <span aria-hidden="true">❤️</span></p>
+        <p class="headline">İyi ki doğdun, iyi ki benim sevgilimsin. <span aria-hidden="true">🥹❤️</span></p>
+      </div>
+    </section>
+
+  </div>
+
+  <button class="nav-arrow prev" id="prevBtn" aria-label="Önceki">‹</button>
+  <button class="nav-arrow next" id="nextBtn" aria-label="Sonraki">›</button>
+
+  <div class="deck-footer">
+    <div class="counter"><span id="counterCurrent">1</span><span class="counter-sep">—</span><span>4</span></div>
+    <div class="dots" id="dots" role="tablist" aria-label="Slayt seçimi"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var deck = document.getElementById('deck');
+  var stage = document.getElementById('stage');
+  var dotsEl = document.getElementById('dots');
+  var counterEl = document.getElementById('counterCurrent');
+  var slides = deck.querySelectorAll('.slide');
+  var total = slides.length;
+  var index = 0;
+
+  for (var i = 0; i < total; i++) {
+    var dot = document.createElement('button');
+    dot.className = 'dot';
+    dot.setAttribute('role', 'tab');
+    dot.setAttribute('aria-label', 'Slayt ' + (i + 1));
+    dot.addEventListener('click', (function(n){ return function(){ goTo(n); }; })(i));
+    dotsEl.appendChild(dot);
+  }
+  var dots = dotsEl.querySelectorAll('.dot');
+
+  function render(){
+    deck.style.transform = 'translateX(-' + (index * 100 / total) + '%)';
+    counterEl.textContent = index + 1;
+    for (var i = 0; i < total; i++) {
+      dots[i].setAttribute('aria-current', i === index ? 'true' : 'false');
+      slides[i].setAttribute('aria-hidden', i === index ? 'false' : 'true');
+    }
+    stage.classList.toggle('finale', index === total - 1);
+  }
+
+  function goTo(n){
+    index = (n + total) % total;
+    render();
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', function(){ goTo(index - 1); });
+  document.getElementById('nextBtn').addEventListener('click', function(){ goTo(index + 1); });
+
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight') goTo(index + 1);
+    if (e.key === 'ArrowLeft') goTo(index - 1);
+  });
+
+  var touchStartX = null;
+  stage.addEventListener('touchstart', function(e){ touchStartX = e.changedTouches[0].clientX; }, { passive:true });
+  stage.addEventListener('touchend', function(e){
+    if (touchStartX === null) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) goTo(dx < 0 ? index + 1 : index - 1);
+    touchStartX = null;
+  }, { passive:true });
+
+  var embersEl = document.getElementById('embers');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion) {
+    for (var e = 0; e < 20; e++) {
+      var ember = document.createElement('span');
+      ember.className = 'ember';
+      var size = 2 + Math.random() * 4;
+      ember.style.setProperty('--x', (Math.random() * 100) + '%');
+      ember.style.setProperty('--x-drift', (Math.random() * 60 - 30) + 'px');
+      ember.style.setProperty('--s', size + 'px');
+      ember.style.setProperty('--d', (9 + Math.random() * 10) + 's');
+      ember.style.setProperty('--delay', (Math.random() * -14) + 's');
+      embersEl.appendChild(ember);
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
