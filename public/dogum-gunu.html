@@ -2,7 +2,11 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1c0f16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>İyi ki Doğdun</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -230,12 +234,12 @@
   }
   .nav-arrow:hover{ border-color:var(--accent); }
   .nav-arrow:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-  .nav-arrow.prev{ left:clamp(.6rem,3vw,2rem); }
-  .nav-arrow.next{ right:clamp(.6rem,3vw,2rem); }
+  .nav-arrow.prev{ left:max(clamp(.6rem,3vw,2rem), env(safe-area-inset-left)); }
+  .nav-arrow.next{ right:max(clamp(.6rem,3vw,2rem), env(safe-area-inset-right)); }
 
   .deck-footer{
     position:absolute;
-    left:0; right:0; bottom:clamp(1rem,3vh,2rem);
+    left:0; right:0; bottom:max(clamp(1rem,3vh,2rem), env(safe-area-inset-bottom));
     z-index:5;
     display:flex;
     flex-direction:column;
@@ -345,8 +349,8 @@
 
   .music-toggle{
     position:absolute;
-    top:clamp(.8rem,3vh,1.6rem);
-    right:clamp(.6rem,3vw,2rem);
+    top:max(clamp(.8rem,3vh,1.6rem), env(safe-area-inset-top));
+    right:max(clamp(.6rem,3vw,2rem), env(safe-area-inset-right));
     z-index:6;
     width:40px; height:40px;
     border-radius:50%;
@@ -588,6 +592,9 @@
   var introBtn = document.getElementById('introBtn');
   introBtn.addEventListener('click', function(){
     introEl.classList.add('hidden');
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(function(){});
+    }
     bgm.play().then(function(){
       musicBtn.setAttribute('aria-pressed', 'true');
       musicBtn.setAttribute('aria-label', 'Müziği durdur');
