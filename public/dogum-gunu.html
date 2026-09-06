@@ -267,6 +267,82 @@
   }
   .dot:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
 
+  .intro{
+    position:absolute;
+    inset:0;
+    z-index:10;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:1.6rem;
+    background:var(--bg);
+    transition:opacity .6s ease, visibility 0s linear 0s;
+  }
+  .intro.hidden{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .6s ease, visibility 0s linear .6s;
+  }
+  .intro-title{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    color:var(--text);
+    font-size:clamp(1.3rem,4vw,1.9rem);
+    margin:0;
+    text-align:center;
+  }
+  .intro-btn{
+    background:none;
+    border:none;
+    padding:1rem;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1rem;
+  }
+  .intro-btn:focus-visible .heart{ outline:2px solid var(--accent); outline-offset:6px; border-radius:2px; }
+  .heart{
+    position:relative;
+    width:70px;
+    height:62px;
+    filter:drop-shadow(0 10px 26px var(--shadow));
+    animation:heartbeat 1.8s ease-in-out infinite;
+  }
+  .heart::before,
+  .heart::after{
+    content:"";
+    position:absolute;
+    top:0;
+    width:45px;
+    height:70px;
+    background:var(--accent-2);
+    border-radius:45px 45px 0 0;
+  }
+  .heart::before{ left:35px; transform:rotate(-45deg); transform-origin:0 100%; }
+  .heart::after{ left:0; transform:rotate(45deg); transform-origin:100% 100%; }
+  @keyframes heartbeat{
+    0%,100%{ transform:scale(1); }
+    15%{ transform:scale(1.1); }
+    30%{ transform:scale(1); }
+    45%{ transform:scale(1.07); }
+    60%{ transform:scale(1); }
+  }
+  .intro-hint{
+    font-family:'Manrope',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.7rem;
+    font-weight:700;
+    color:var(--accent);
+    margin:0;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .heart{ animation:none; }
+  }
+
   .music-toggle{
     position:absolute;
     top:clamp(.8rem,3vh,1.6rem);
@@ -326,6 +402,14 @@
 <body>
 <div class="stage" id="stage">
   <div class="embers" id="embers" aria-hidden="true"></div>
+
+  <div class="intro" id="intro">
+    <p class="intro-title">Sana bir şey hazırladım.</p>
+    <button class="intro-btn" id="introBtn" aria-label="Aç">
+      <span class="heart" aria-hidden="true"></span>
+      <span class="intro-hint">dokun</span>
+    </button>
+  </div>
 
   <div class="deck" id="deck">
 
@@ -498,6 +582,16 @@
     }
   });
   bgm.load();
+
+  var introEl = document.getElementById('intro');
+  var introBtn = document.getElementById('introBtn');
+  introBtn.addEventListener('click', function(){
+    introEl.classList.add('hidden');
+    bgm.play().then(function(){
+      musicBtn.setAttribute('aria-pressed', 'true');
+      musicBtn.setAttribute('aria-label', 'Müziği durdur');
+    }).catch(function(){});
+  });
 
   render();
 })();
