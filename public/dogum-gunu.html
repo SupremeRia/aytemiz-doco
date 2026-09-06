@@ -216,6 +216,46 @@
     color:var(--polaroid-ink);
   }
 
+  .slide.grid-slide{
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:flex-start;
+    gap:.75rem;
+    padding-top:clamp(2.5rem,7vh,4rem);
+  }
+  .memory-header{
+    flex:0 0 auto;
+    text-align:center;
+  }
+  .memory-header .headline{ margin:0; }
+  .memory-grid{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(84px, 1fr));
+    gap:.65rem;
+    padding:.5rem .25rem clamp(1.5rem,4vh,2.5rem);
+  }
+  .memory-item{
+    aspect-ratio:1/1;
+    background:var(--polaroid-bg);
+    padding:5px;
+    box-shadow:0 8px 18px -8px var(--shadow);
+    transform:rotate(var(--r,0deg));
+  }
+  .memory-item:nth-child(4n){ --r:-3deg; }
+  .memory-item:nth-child(4n+1){ --r:2deg; }
+  .memory-item:nth-child(4n+2){ --r:-1.5deg; }
+  .memory-item:nth-child(4n+3){ --r:2.5deg; }
+  .memory-item img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
   .nav-arrow{
     position:absolute;
     top:50%;
@@ -501,7 +541,7 @@
 
   <div class="deck" id="deck">
 
-    <section class="slide" data-index="0" aria-label="1 / 4">
+    <section class="slide" data-index="0" aria-label="1 / 5">
       <div class="copy">
         <p class="eyebrow">İyi ki doğdun</p>
         <p class="headline"><span class="lede">Güzelim,</span> iyi ki doğdun, iyi ki hayatıma girdin ve iyi ki bana denk geldin. <span aria-hidden="true">❤️</span></p>
@@ -519,7 +559,7 @@
       </div>
     </section>
 
-    <section class="slide reverse" data-index="1" aria-label="2 / 4">
+    <section class="slide reverse" data-index="1" aria-label="2 / 5">
       <div class="copy">
         <p class="eyebrow">6 ay</p>
         <p class="body-text">Seninle geçirdiğim bu 6 ayda çokça maceramız, çokça güldüğümüz anımız ve bazen de tedirgin olduğumuz zamanlarımız oldu. Uzakta olsak da her anımda yanımda olduğunu hissettirdin. Her şey için, bana kattığın bütün güzellikler için sana çok teşekkür ederim.</p>
@@ -536,7 +576,7 @@
       </div>
     </section>
 
-    <section class="slide" data-index="2" aria-label="3 / 4">
+    <section class="slide" data-index="2" aria-label="3 / 5">
       <div class="copy">
         <p class="eyebrow">uzaklık</p>
         <p class="body-text">Bazen mesafeler zor geliyor, bazen birbirimize sarılmayı, yan yana olmayı çok özlüyorum. Ama bütün bunlara rağmen hâlâ mutluyuz, huzurluyuz ve birlikteyiz. Umarım bundan sonra da daha nice güzel anılar, maceralar ve doğum günleri paylaşırız.</p>
@@ -553,7 +593,7 @@
       </div>
     </section>
 
-    <section class="slide center" data-index="3" aria-label="4 / 4">
+    <section class="slide center" data-index="3" aria-label="4 / 5" data-finale="true">
       <div class="photo-frame" style="--tilt:0deg">
         <div class="photo-window">
           <img src="dogum-gunu/foto4.jpg" alt="Akşam, yan yana çekilmiş bir fotoğraf" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -572,6 +612,36 @@
       </div>
     </section>
 
+    <section class="slide grid-slide" data-index="4" aria-label="5 / 5">
+      <div class="memory-header">
+        <p class="eyebrow">onunla yaptığım her şey</p>
+        <p class="headline">Anı Köşesi</p>
+      </div>
+      <div class="memory-grid">
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto01.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto02.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto03.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto04.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto05.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto06.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto07.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto08.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto09.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto10.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto11.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto12.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto13.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto14.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto15.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto16.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto17.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto18.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto19.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto20.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto21.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+      </div>
+    </section>
+
   </div>
 
   <button class="nav-arrow prev" id="prevBtn" aria-label="Önceki">‹</button>
@@ -583,7 +653,7 @@
   <audio id="bgm" src="dogum-gunu/canisi.mp3" loop preload="none"></audio>
 
   <div class="deck-footer">
-    <div class="counter"><span id="counterCurrent">1</span><span class="counter-sep">—</span><span>4</span></div>
+    <div class="counter"><span id="counterCurrent">1</span><span class="counter-sep">—</span><span id="counterTotal">4</span></div>
     <div class="dots" id="dots" role="tablist" aria-label="Slayt seçimi"></div>
   </div>
 </div>
@@ -608,6 +678,15 @@
   var slides = deck.querySelectorAll('.slide');
   var total = slides.length;
   var index = 0;
+  var finaleIndex = -1;
+
+  deck.style.width = (total * 100) + '%';
+  for (var s = 0; s < total; s++) {
+    slides[s].style.width = (100 / total) + '%';
+    slides[s].style.flex = '0 0 ' + (100 / total) + '%';
+    if (slides[s].dataset.finale === 'true') finaleIndex = s;
+  }
+  document.getElementById('counterTotal').textContent = total;
 
   for (var i = 0; i < total; i++) {
     var dot = document.createElement('button');
@@ -653,12 +732,12 @@
       dots[i].setAttribute('aria-current', i === index ? 'true' : 'false');
       slides[i].setAttribute('aria-hidden', i === index ? 'false' : 'true');
     }
-    stage.classList.toggle('finale', index === total - 1);
+    stage.classList.toggle('finale', index === finaleIndex);
   }
 
   function goTo(n){
     var newIndex = (n + total) % total;
-    var enteringFinale = newIndex === total - 1 && index !== total - 1;
+    var enteringFinale = newIndex === finaleIndex && index !== finaleIndex;
     index = newIndex;
     render();
     if (enteringFinale) burstHearts();
