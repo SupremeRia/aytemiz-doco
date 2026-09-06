@@ -256,6 +256,27 @@
     display:block;
   }
 
+  .memory-finale{
+    flex:0 0 auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.5rem;
+    text-align:center;
+    padding:.25rem 0 clamp(1rem,3vh,1.75rem);
+  }
+  .photo-frame.small{ width:min(150px,42vw); }
+  .photo-frame.small .photo-window{ aspect-ratio:1/1; }
+  .sun-line{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    color:var(--text);
+    font-size:.95rem;
+    line-height:1.5;
+    max-width:32ch;
+    margin:0;
+  }
+
   .nav-arrow{
     position:absolute;
     top:50%;
@@ -608,7 +629,6 @@
         <p class="eyebrow">iyi ki</p>
         <p class="body-text">İyi ki varsın güzelim. Seni çok seviyorum. <span aria-hidden="true">❤️</span></p>
         <p class="headline">İyi ki doğdun, iyi ki benim sevgilimsin. <span aria-hidden="true">🥹❤️</span></p>
-        <p class="replay-hint">yeniden izlemek için dokun</p>
       </div>
     </section>
 
@@ -638,7 +658,19 @@
     <div class="memory-item"><img src="dogum-gunu/anilar/anifoto18.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
     <div class="memory-item"><img src="dogum-gunu/anilar/anifoto19.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
     <div class="memory-item"><img src="dogum-gunu/anilar/anifoto20.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
-    <div class="memory-item"><img src="dogum-gunu/anilar/anifoto21.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+      </div>
+      <div class="memory-finale">
+        <div class="photo-frame small" style="--tilt:-2deg">
+          <div class="photo-window">
+            <img src="dogum-gunu/anilar/anifoto21.jpg" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="photo-fallback">
+              <span class="mark">21</span>
+              <span class="file">anifoto21.jpg</span>
+            </div>
+          </div>
+        </div>
+        <p class="sun-line">Benim hayatımın güneşisin ve bu anlar, güneşin bana en çok parıldadığı anlar.</p>
+        <p class="replay-hint">yeniden izlemek için dokun</p>
       </div>
     </section>
 
