@@ -482,10 +482,34 @@
   }
   @keyframes hintPulse{ 0%,100%{ opacity:.4; } 50%{ opacity:.85; } }
 
+  .scroll-hint{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.35rem;
+    color:var(--accent);
+    opacity:.75;
+    font-family:'Manrope',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:.65rem;
+    font-weight:700;
+  }
+  .scroll-hint .arrows{
+    display:inline-block;
+    animation:scrollBounce 1.6s ease-in-out infinite;
+  }
+  @keyframes scrollBounce{
+    0%,100%{ transform:translateY(-2px); }
+    50%{ transform:translateY(2px); }
+  }
+
   @media (prefers-reduced-motion: reduce){
     .heart-burst{ display:none; }
     .burst-text{ display:none; }
     .replay-hint{ animation:none; opacity:.6; }
+    .scroll-hint .arrows{ animation:none; }
   }
 
   .music-toggle{
@@ -658,6 +682,7 @@
     <div class="memory-item"><img src="dogum-gunu/anilar/anifoto20.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
     <div class="memory-item"><img src="dogum-gunu/anilar/anifoto21.jpg" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
       </div>
+      <p class="scroll-hint" aria-hidden="true"><span class="arrows">↕</span> kaydır</p>
       <div class="memory-finale">
         <p class="sun-line">Benim hayatımın güneşisin ve bu anlar, güneşin bana en çok parıldadığı anlar.</p>
         <p class="replay-hint">yeniden izlemek için dokun</p>
