@@ -176,7 +176,7 @@
   .photo-fallback{
     position:absolute;
     inset:0;
-    display:flex;
+    display:none;
     flex-direction:column;
     align-items:center;
     justify-content:center;
@@ -336,7 +336,7 @@
       </div>
       <div class="photo-frame" style="--tilt:-3deg">
         <div class="photo-window">
-          <img src="dogum-gunu/foto1.jpg" alt="Gece, yan yana çekilmiş bir selfie" onerror="this.remove()">
+          <img src="dogum-gunu/foto1.jpg" alt="Gece, yan yana çekilmiş bir selfie" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="photo-fallback">
             <span class="mark">1</span>
             <span class="file">dogum-gunu/foto1.jpg</span>
@@ -353,7 +353,7 @@
       </div>
       <div class="photo-frame" style="--tilt:2.5deg">
         <div class="photo-window">
-          <img src="dogum-gunu/foto2.jpg" alt="Kumsalda, güneşli bir öğleden sonra" onerror="this.remove()">
+          <img src="dogum-gunu/foto2.jpg" alt="Kumsalda, güneşli bir öğleden sonra" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="photo-fallback">
             <span class="mark">2</span>
             <span class="file">dogum-gunu/foto2.jpg</span>
@@ -370,7 +370,7 @@
       </div>
       <div class="photo-frame" style="--tilt:-2deg">
         <div class="photo-window">
-          <img src="dogum-gunu/foto3.jpg" alt="Odada, kahkaha atarken çekilmiş bir selfie" onerror="this.remove()">
+          <img src="dogum-gunu/foto3.jpg" alt="Odada, kahkaha atarken çekilmiş bir selfie" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="photo-fallback">
             <span class="mark">3</span>
             <span class="file">dogum-gunu/foto3.jpg</span>
@@ -383,7 +383,7 @@
     <section class="slide center" data-index="3" aria-label="4 / 4">
       <div class="photo-frame" style="--tilt:0deg">
         <div class="photo-window">
-          <img src="dogum-gunu/foto4.jpg" alt="Akşam, yan yana çekilmiş bir fotoğraf" onerror="this.remove()">
+          <img src="dogum-gunu/foto4.jpg" alt="Akşam, yan yana çekilmiş bir fotoğraf" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div class="photo-fallback">
             <span class="mark">4</span>
             <span class="file">dogum-gunu/foto4.jpg</span>
