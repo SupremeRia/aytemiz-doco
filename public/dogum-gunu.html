@@ -359,7 +359,7 @@
   .burst-heart{
     position:absolute;
     top:50%; left:50%;
-    width:14px; height:12px;
+    width:22px; height:19px;
     opacity:0;
     animation:burst 1.3s ease-out forwards;
     animation-delay:var(--bd,0s);
@@ -368,16 +368,45 @@
     content:"";
     position:absolute;
     top:0;
-    width:9px; height:14px;
+    width:14px; height:22px;
     background:var(--accent-2);
-    border-radius:9px 9px 0 0;
+    border-radius:14px 14px 0 0;
   }
-  .burst-heart::before{ left:7px; transform:rotate(-45deg); transform-origin:0 100%; }
+  .burst-heart::before{ left:11px; transform:rotate(-45deg); transform-origin:0 100%; }
   .burst-heart::after{ left:0; transform:rotate(45deg); transform-origin:100% 100%; }
   @keyframes burst{
     0%{ transform:translate(-50%,-50%) scale(.4); opacity:0; }
     18%{ opacity:1; }
     100%{ transform:translate(calc(-50% + var(--tx,0px)), calc(-50% + var(--ty,0px))) scale(1); opacity:0; }
+  }
+
+  .burst-text{
+    position:absolute;
+    inset:0;
+    z-index:4;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:1rem;
+    text-align:center;
+    pointer-events:none;
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:clamp(2.1rem,7vw,4rem);
+    color:var(--accent-2);
+    text-shadow:0 4px 30px var(--shadow);
+    opacity:0;
+  }
+  .burst-text.show{
+    animation:burstTextIn 2.2s ease forwards;
+  }
+  @keyframes burstTextIn{
+    0%{ opacity:0; transform:scale(.7); }
+    22%{ opacity:1; transform:scale(1.04); }
+    32%{ transform:scale(1); }
+    78%{ opacity:1; }
+    100%{ opacity:0; }
   }
 
   .replay-hint{
@@ -395,6 +424,7 @@
 
   @media (prefers-reduced-motion: reduce){
     .heart-burst{ display:none; }
+    .burst-text{ display:none; }
     .replay-hint{ animation:none; opacity:.6; }
   }
 
@@ -458,6 +488,7 @@
 <div class="stage" id="stage">
   <div class="embers" id="embers" aria-hidden="true"></div>
   <div class="heart-burst" id="heartBurst" aria-hidden="true"></div>
+  <p class="burst-text" id="burstText" aria-hidden="true">İyi ki doğdun</p>
 
   <div class="intro" id="intro">
     <p class="intro-title">Sana bir şey hazırladım.</p>
@@ -589,22 +620,29 @@
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var heartBurstEl = document.getElementById('heartBurst');
+  var burstTextEl = document.getElementById('burstText');
 
   function burstHearts(){
     if (reduceMotion || !heartBurstEl) return;
     heartBurstEl.innerHTML = '';
-    var n = 12;
+    var n = 14;
     for (var i = 0; i < n; i++) {
       var h = document.createElement('span');
       h.className = 'burst-heart';
       var angle = (Math.PI * 2 * i / n) + (Math.random() * 0.4 - 0.2);
-      var dist = 90 + Math.random() * 70;
+      var dist = 130 + Math.random() * 90;
       h.style.setProperty('--tx', (Math.cos(angle) * dist) + 'px');
       h.style.setProperty('--ty', (Math.sin(angle) * dist) + 'px');
       h.style.setProperty('--bd', (Math.random() * 0.2) + 's');
       heartBurstEl.appendChild(h);
     }
     setTimeout(function(){ heartBurstEl.innerHTML = ''; }, 1600);
+
+    if (burstTextEl) {
+      burstTextEl.classList.remove('show');
+      void burstTextEl.offsetWidth;
+      setTimeout(function(){ burstTextEl.classList.add('show'); }, 500);
+    }
   }
 
   function render(){
